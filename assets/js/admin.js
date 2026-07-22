@@ -133,6 +133,7 @@ function rendereSignups() {
     list.innerHTML = '';
     count.textContent = `${signupsCache.length} Anmeldungen gesamt`;
     delAll.hidden = signupsCache.length === 0;
+    rendereUebersicht();
 
     if (signupsCache.length === 0) {
         const p = document.createElement('p');
@@ -154,6 +155,90 @@ function rendereSignups() {
         const rows = byShift.get(shift.id);
         if (!rows || rows.length === 0) continue;
         list.appendChild(rendereShiftGruppe(shift, rows));
+    }
+}
+
+function rendereUebersicht() {
+    const grid = document.getElementById('signups-overview');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const nachTag = new Map();
+    for (const shift of shiftsCache) {
+        if (!nachTag.has(shift.shift_date)) nachTag.set(shift.shift_date, []);
+        nachTag.get(shift.shift_date).push(shift);
+    }
+
+    const WT = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    for (const [datum, tagesSchichten] of nachTag) {
+        const d = new Date(datum + 'T12:00:00');
+        const spalte = document.createElement('section');
+        spalte.className = 'day';
+        const header = document.createElement('header');
+        header.className = 'day__header';
+        const titel = document.createElement('h2');
+        titel.className = 'day__title';
+        titel.textContent = WT[d.getDay()];
+        const dat = document.createElement('span');
+        dat.className = 'day__date';
+        dat.textContent = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.`;
+        header.append(titel, dat);
+        spalte.appendChild(header);
+
+        // Signups pro Schicht, sortiert nach created_at
+        for (const shift of tagesSchichten) {
+            const rows = signupsCache
+                .filter(s => s.shift_id === shift.id)
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            const kap = shift.max_persons + 1;
+            const voll = rows.length >= kap;
+
+            const card = document.createElement('div');
+            card.className = 'shift';
+            if (voll) card.setAttribute('aria-disabled', 'true');
+
+            const zeit = document.createElement('span');
+            zeit.className = 'shift__time';
+            zeit.textContent = `${hhmm(shift.start_time)}–${hhmm(shift.end_time)}`;
+            card.appendChild(zeit);
+
+            const status = document.createElement('span');
+            status.className = 'shift__status';
+            if (rows.length > shift.max_persons) {
+                status.textContent = `${shift.max_persons} / ${shift.max_persons} · +${rows.length - shift.max_persons} Reserve`;
+            } else {
+                status.textContent = `${rows.length} / ${shift.max_persons} Plätze`;
+            }
+            card.appendChild(status);
+
+            const slots = document.createElement('span');
+            slots.className = 'shift__slots';
+            slots.setAttribute('aria-hidden', 'true');
+            for (let i = 0; i < kap; i++) {
+                const dot = document.createElement('span');
+                let cls = 'slot';
+                if (i === shift.max_persons) cls += ' slot--buffer';
+                if (i < rows.length) cls += ' slot--filled';
+                dot.className = cls;
+                slots.appendChild(dot);
+            }
+            card.appendChild(slots);
+
+            if (rows.length > 0) {
+                const namenEl = document.createElement('span');
+                namenEl.className = 'shift__names';
+                rows.forEach((s, i) => {
+                    const span = document.createElement('span');
+                    span.textContent = s.name || 'unbekannt';
+                    if (!s.show_name_publicly) span.className = 'anon';
+                    namenEl.appendChild(span);
+                    if (i < rows.length - 1) namenEl.appendChild(document.createTextNode(', '));
+                });
+                card.appendChild(namenEl);
+            }
+            spalte.appendChild(card);
+        }
+        grid.appendChild(spalte);
     }
 }
 
@@ -274,7 +359,9 @@ async function handleTexteSave(e) {
     btn.textContent = orig;
 
     if (errors.length > 0) {
-        toast(`Speichern fehlgeschlagen (${errors.length}). Details in der Konsole.`, 'error');
+        const first = errors[0].split(':').slice(1).join(':').trim() || 'unbekannter Fehler';
+        console.error('site_content update errors:', errors);
+        toast(`Speichern fehlgeschlagen: ${first.slice(0, 120)}`, 'error');
         return;
     }
     toast('Texte gespeichert. Änderungen sind sofort auf der Startseite sichtbar.');
@@ -283,6 +370,9 @@ async function handleTexteSave(e) {
 // ---------- Session-Check bei Start ----------
 
 async function pruefeSession() {
+    // Session refreshen, damit der JWT die AKTUELLEN app_metadata-Claims
+    // enthaelt (der is_admin-Claim wird sonst nur bei frischem Login gesetzt).
+    try { await supabase.auth.refreshSession(); } catch { /* ok */ }
     const { data } = await supabase.auth.getSession();
     if (data?.session?.user?.app_metadata?.is_admin === true) {
         zeigeAdminApp();

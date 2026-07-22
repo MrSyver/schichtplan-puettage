@@ -112,7 +112,7 @@ vielen Dank fürs Eintragen! Deine Helfer-Schicht am Bierwagen bei den Beckumer 
     ${dateStr}
     ${zeitStr}
 
-Du bist auf der Liste. Solltest du doch nicht kannst, kein Problem – melde dich einfach kurz ab:
+Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:
 ${unsubUrl || '[Abmelden per Antwort auf diese Mail]'}
 
 Bis zum Fest,
@@ -129,7 +129,7 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         <div style="font-weight:600; font-size:1.05rem;">${esc(dateStr)}</div>
         <div style="font-variant-numeric:tabular-nums;">${esc(zeitStr)}</div>
     </div>
-    <p>Du bist auf der Liste. Solltest du doch nicht können, kein Problem:</p>
+    <p>Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:</p>
     ${unsubUrl
         ? `<p style="margin:16px 0;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 16px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #E2E8F0;">Von dieser Schicht abmelden</a></p>`
         : `<p style="margin:16px 0; color:#64748B;">Zum Abmelden: einfach kurz auf diese E-Mail antworten.</p>`}

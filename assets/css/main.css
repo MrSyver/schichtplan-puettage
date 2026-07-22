@@ -1003,21 +1003,48 @@ button { cursor: pointer; }
    Admin-Bereich (admin.html)
    -------------------------------------------------------- */
 
-.admin-header .container {
-    position: relative;
-    padding-right: 5rem;
+.admin-header__actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
 }
 
-.admin-header__logout {
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
+.admin-header__actions .btn {
     background: rgba(255,255,255,0.15);
     color: #fff;
     border-color: rgba(255,255,255,0.3);
+    font-size: 0.85rem;
+    padding: 0.5rem 0.85rem;
+    min-height: 36px;
+    white-space: nowrap;
 }
-.admin-header__logout:hover { background: rgba(255,255,255,0.25); }
+.admin-header__actions .btn:hover { background: rgba(255,255,255,0.28); color: #fff; }
+
+.admin-header__back { text-decoration: none; }
+
+@media (max-width: 600px) {
+    .admin-header__actions .btn { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+}
+
+.admin-subhead {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--color-border);
+}
+.admin-subhead:not(:first-child) { margin-top: 2.5rem; }
+
+/* Kompakte Übersicht (wie Startseite, aber mit Klarnamen) */
+.admin-overview { margin-bottom: 0.5rem; }
+.admin-overview .shift { cursor: default; }
+.admin-overview .shift:hover { transform: none; box-shadow: var(--shadow-xs); border-color: var(--color-border); background: var(--color-surface); }
+.admin-overview .shift__names { color: var(--color-text); }
+.admin-overview .shift__names .anon { color: var(--color-text-muted); font-style: italic; }
 
 .admin-main {
     padding: 2rem 1rem 4rem;
