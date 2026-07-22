@@ -10,8 +10,13 @@
     /* Rot – nur noch als Akzent */
     --color-primary:        #C8102E;
     --color-primary-dark:   #A00C24;
+    --color-primary-deeper: #7A0918;   /* fuer Header-Gradient-Endpunkt */
     --color-primary-hover:  #B00E28;
     --color-primary-soft:   #FBE9EC;   /* Hover-/Highlight-Hintergrund */
+    --color-gold:           #C9A24B;   /* Zierakzent, klassisch */
+
+    /* Titel-Schrift (System-Serif fuer klassischen Vereinseindruck) */
+    --font-title: Georgia, 'Palatino Linotype', Palatino, 'Times New Roman', serif;
 
     /* Neutralen mit klarer Skala */
     --color-bg:             #F7F7F8;   /* Seitenhintergrund */
@@ -304,44 +309,64 @@ button { cursor: pointer; }
 
 .site-header {
     background:
-        linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+        radial-gradient(ellipse at top left, rgba(255,255,255,0.08) 0%, transparent 55%),
+        linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-dark) 55%, var(--color-primary-deeper) 100%);
     color: #fff;
-    padding: 1.25rem 0 1.4rem;
-    box-shadow: var(--shadow-sm);
+    padding: 1.75rem 0 1.5rem;
+    box-shadow: 0 4px 16px rgba(122, 9, 24, 0.15);
+    border-bottom: 3px double var(--color-gold);
+    position: relative;
+}
+
+.site-header::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -3px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    opacity: 0.6;
 }
 
 .site-header .container {
     display: flex;
     align-items: center;
-    gap: var(--gap-md);
+    gap: 1.25rem;
 }
 
 .site-header__logo {
-    width: 72px;
-    height: 72px;
+    width: 96px;
+    height: 96px;
     flex-shrink: 0;
     background: #FFFFFF;
     border-radius: 50%;
     padding: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow:
+        0 0 0 2px var(--color-gold),
+        0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 @media (max-width: 520px) {
-    .site-header__logo { width: 56px; height: 56px; padding: 4px; }
+    .site-header { padding: 1.25rem 0 1.1rem; }
+    .site-header__logo { width: 68px; height: 68px; padding: 4px; }
 }
 
 .site-header__title {
-    font-size: var(--fs-lg);
+    font-family: var(--font-title);
+    font-size: clamp(1.15rem, 3.5vw, 1.55rem);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.005em;
     color: #fff;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .site-header__subtitle {
     font-size: var(--fs-xs);
-    opacity: 0.88;
-    margin-top: 0.15em;
-    letter-spacing: 0.02em;
+    margin-top: 0.35em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    font-weight: 500;
 }
 
 /* --------------------------------------------------------

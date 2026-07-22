@@ -107,7 +107,7 @@ Deno.serve(async (req: Request) => {
         const unsubUrl = `${urlBase}?abmelden=${encodeURIComponent(s.id as string)}&t=${encodeURIComponent(s.delete_token as string)}`;
 
         const text =
-`Hallo ${s.name},
+`Horrido ${s.name},
 
 nur zur Erinnerung: morgen ist deine Bierwagen-Schicht bei den Beckumer Püttagen 2026!
 
@@ -120,20 +120,19 @@ Falls du kurzfristig doch nicht kannst:
 ${unsubUrl}
 
 Bis morgen,
-Puettage-Bierwagen-Team`;
+Familie Martin`;
 
         const html = `<!doctype html>
 <html lang="de"><body style="font-family:-apple-system,Segoe UI,system-ui,sans-serif; color:#0F172A; line-height:1.5; max-width:520px; margin:0 auto; padding:24px;">
-    <h2 style="color:#0F172A; margin:0 0 12px;">Erinnerung: morgen ist deine Schicht 🍺</h2>
-    <p>Hallo ${esc(s.name as string)},</p>
-    <p>nur zur Erinnerung – morgen ist deine Bierwagen-Schicht bei den <strong>Beckumer Püttagen 2026</strong>:</p>
+    <h2 style="color:#0F172A; margin:0 0 12px;">Horrido ${esc(s.name as string)}! Morgen ist deine Schicht 🍺</h2>
+    <p>Nur zur Erinnerung: morgen ist deine Bierwagen-Schicht bei den <strong>Beckumer Püttagen 2026</strong>:</p>
     <div style="background:#FBE9EC; border-left:4px solid #C8102E; padding:14px 18px; border-radius:8px; margin:16px 0;">
         <div style="font-weight:600; font-size:1.05rem;">${esc(dateStr)}</div>
         <div style="font-variant-numeric:tabular-nums;">${esc(zeitStr)}</div>
     </div>
     <p>Wir freuen uns auf dich!</p>
     <p style="margin:20px 0;"><a href="${esc(unsubUrl)}" style="color:#64748B; font-size:0.85rem; text-decoration:underline;">Doch nicht können? Hier austragen.</a></p>
-    <p style="margin-top:24px;">Bis morgen,<br>Puettage-Bierwagen-Team</p>
+    <p style="margin-top:24px;">Bis morgen,<br><strong>Familie Martin</strong></p>
 </body></html>`;
 
         const payload: Record<string, unknown> = { from: MAIL_FROM, to: [s.email], subject, text, html };

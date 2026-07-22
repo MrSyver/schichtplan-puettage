@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
         : '';
 
     const text =
-`Hallo ${signup.name},
+`Horrido ${signup.name},
 
 vielen Dank fürs Eintragen! Deine Helfer-Schicht am Bierwagen bei den Beckumer Püttagen 2026:
 
@@ -116,15 +116,15 @@ Du bist auf der Liste. Solltest du doch nicht kannst, kein Problem – melde dic
 ${unsubUrl || '[Abmelden per Antwort auf diese Mail]'}
 
 Bis zum Fest,
-Puettage-Bierwagen-Team
+Familie Martin
 
 --
 Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen angegeben wurde.`;
 
     const html = `<!doctype html>
 <html lang="de"><body style="font-family:-apple-system,Segoe UI,system-ui,sans-serif; color:#0F172A; line-height:1.5; max-width:520px; margin:0 auto; padding:24px;">
-    <h2 style="color:#0F172A; margin:0 0 12px;">Danke fürs Eintragen, ${esc(signup.name as string)}!</h2>
-    <p>Deine Helfer-Schicht am Bierwagen bei den <strong>Püttagen 2026</strong> ist gebucht:</p>
+    <h2 style="color:#0F172A; margin:0 0 12px;">Horrido ${esc(signup.name as string)}!</h2>
+    <p>Vielen Dank fürs Eintragen. Deine Helfer-Schicht am Bierwagen bei den <strong>Püttagen 2026</strong> ist gebucht:</p>
     <div style="background:#FBE9EC; border-left:4px solid #C8102E; padding:14px 18px; border-radius:8px; margin:16px 0;">
         <div style="font-weight:600; font-size:1.05rem;">${esc(dateStr)}</div>
         <div style="font-variant-numeric:tabular-nums;">${esc(zeitStr)}</div>
@@ -133,7 +133,7 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
     ${unsubUrl
         ? `<p style="margin:16px 0;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 16px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #E2E8F0;">Von dieser Schicht abmelden</a></p>`
         : `<p style="margin:16px 0; color:#64748B;">Zum Abmelden: einfach kurz auf diese E-Mail antworten.</p>`}
-    <p style="margin-top:32px;">Bis zum Fest,<br>Puettage-Bierwagen-Team</p>
+    <p style="margin-top:32px;">Bis zum Fest,<br><strong>Familie Martin</strong></p>
     <hr style="border:none; border-top:1px solid #E2E8F0; margin:32px 0 12px;">
     <p style="color:#64748B; font-size:0.8125rem;">Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen angegeben wurde.</p>
 </body></html>`;

@@ -1,11 +1,11 @@
 // ============================================================
 // Supabase Edge Function: send-access-request
 // ============================================================
-// Wird vom Passwort-Gate aufgerufen. Sendet eine Info-Mail an den
-// Betreiber (MAIL_REPLY_TO). Rate-Limit: max 3 Anfragen pro
-// E-Mail-Adresse innerhalb einer Stunde.
+// Wird vom Passwort-Gate aufgerufen. Sendet Info-Mail an Betreiber
+// (MAIL_REPLY_TO) mit „Passwort verschicken"-Button (HMAC-Link auf
+// grant-access). Rate-Limit: 15 Anfragen pro Stunde global.
 //
-// Env: RESEND_API_KEY, MAIL_FROM, MAIL_REPLY_TO,
+// Env: RESEND_API_KEY, MAIL_FROM, MAIL_REPLY_TO, GRANT_TOKEN_SECRET,
 //      SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (auto-injected)
 // ============================================================
 
@@ -17,12 +17,22 @@ const CORS = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Globales Limit ueber ALLE Anfragen (Anti-Spam/DoS).
-// 15 Anfragen pro Stunde ist reichlich fuer einen Verein und stoppt Bots.
 const MAX_REQUESTS_PER_HOUR_GLOBAL = 15;
+const GRANT_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 Tage
+const encoder = new TextEncoder();
 
 function esc(s: string): string {
     return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+}
+
+async function signHmac(msg: string, secret: string): Promise<string> {
+    const key = await crypto.subtle.importKey(
+        'raw', encoder.encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false, ['sign'],
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(msg));
+    return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 Deno.serve(async (req: Request) => {
@@ -30,12 +40,13 @@ Deno.serve(async (req: Request) => {
     if (req.method !== 'POST')    return new Response('method not allowed', { status: 405, headers: CORS });
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    const MAIL_FROM      = Deno.env.get('MAIL_FROM') ?? 'Puettage Helfer <onboarding@resend.dev>';
+    const MAIL_FROM      = Deno.env.get('MAIL_FROM') ?? 'Helferplan St. Sebastian <helfer@st-sebastian-schichtplan.de>';
     const RECIPIENT      = Deno.env.get('MAIL_REPLY_TO');
     const SUPABASE_URL   = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const GRANT_SECRET   = Deno.env.get('GRANT_TOKEN_SECRET');
 
-    if (!RESEND_API_KEY || !RECIPIENT || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (!RESEND_API_KEY || !RECIPIENT || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !GRANT_SECRET) {
         console.error('Missing env vars');
         return new Response(JSON.stringify({ ok: false, error: 'config_missing' }), {
             status: 500, headers: { ...CORS, 'content-type': 'application/json' },
@@ -56,7 +67,7 @@ Deno.serve(async (req: Request) => {
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Rate-Limit-Check: globales Fenster - wie viele Anfragen in der letzten Stunde ueberhaupt?
+    // Rate-Limit-Check: globales Fenster
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count, error: cntErr } = await admin
         .from('access_requests')
@@ -71,27 +82,43 @@ Deno.serve(async (req: Request) => {
         });
     }
 
-    // Anfrage protokollieren (fuer Rate-Limit); alte Zeilen (>24h) opportunistisch aufraeumen
+    // Anfrage protokollieren (fuer Rate-Limit); alte Zeilen aufraeumen
     await admin.from('access_requests').insert({ email });
     await admin.from('access_requests').delete().lt('requested_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-    const subject = `Zugriffs-Anfrage Puettage-Helferplan${name ? ` (${name})` : ''}`;
+    // HMAC-signierten Grant-Link erzeugen (Passwort automatisch versenden bei Klick)
+    const expires = Date.now() + GRANT_TOKEN_TTL_MS;
+    const sig = await signHmac(`${email}|${expires}`, GRANT_SECRET);
+    const grantUrl = `${SUPABASE_URL}/functions/v1/grant-access?email=${encodeURIComponent(email)}&expires=${expires}&sig=${sig}`;
+
+    const subject = `Zugriffs-Anfrage: ${name || email}`;
     const text =
 `Neue Anfrage fuer den Zugriff auf den Helferplan:
 
-  E-Mail: ${email}
-  Name:   ${name || '(nicht angegeben)'}
+  Name:  ${name || '(nicht angegeben)'}
+  Mail:  ${email}
 
-Antworte dieser Person mit dem Passwort.`;
+Klicke auf folgenden Link, um das Passwort per Mail an ${email} zu senden:
+${grantUrl}
+
+Der Link ist 7 Tage gueltig.`;
 
     const html = `<!doctype html>
-<html lang="de"><body style="font-family:-apple-system,Segoe UI,system-ui,sans-serif; color:#0F172A; line-height:1.5; max-width:520px; margin:0 auto; padding:24px;">
-    <h2 style="color:#0F172A; margin:0 0 8px;">Zugriffs-Anfrage Puettage-Helferplan</h2>
-    <ul style="background:#F7F7F8; padding:14px 24px; border-radius:8px;">
+<html lang="de"><body style="font-family:-apple-system,Segoe UI,system-ui,sans-serif; color:#0F172A; line-height:1.55; max-width:520px; margin:0 auto; padding:24px;">
+    <h2 style="color:#0F172A; margin:0 0 8px;">Neue Zugriffs-Anfrage</h2>
+    <ul style="background:#F7F7F8; padding:14px 22px; border-radius:8px; list-style:none; margin:0;">
+        <li style="margin-bottom:4px;"><strong>Name:</strong> ${esc(name || '(nicht angegeben)')}</li>
         <li><strong>E-Mail:</strong> <a href="mailto:${esc(email)}">${esc(email)}</a></li>
-        <li><strong>Name:</strong> ${esc(name || '(nicht angegeben)')}</li>
     </ul>
-    <p>Antworte dieser Person mit dem Passwort.</p>
+    <p style="margin-top:20px;">Ein Klick auf den Button unten schickt dieser Person das Passwort automatisch per Mail:</p>
+    <p style="margin:16px 0 8px;">
+        <a href="${esc(grantUrl)}" style="display:inline-block; padding:12px 22px; background:#C8102E; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">
+            Passwort an ${esc(email)} senden
+        </a>
+    </p>
+    <p style="color:#64748B; font-size:0.85rem; margin-top:8px;">Der Link ist 7 Tage gültig. Ohne Klick passiert nichts.</p>
+    <hr style="border:none; border-top:1px solid #E2E8F0; margin:24px 0 12px;">
+    <p style="color:#94A3B8; font-size:0.8rem;">Falls du der Person NICHT das Passwort geben willst: einfach diese Mail ignorieren. Ohne Klick wird nichts versendet.</p>
 </body></html>`;
 
     const payload: Record<string, unknown> = {

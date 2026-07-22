@@ -69,7 +69,12 @@ function initGate() {
     const gateInput = document.getElementById('gate-password');
     const gateError = document.getElementById('gate-error');
 
-    if (localStorage.getItem(GATE_STORAGE_KEY) === '1') {
+    // Wenn ein Abmelde-Link (?abmelden=…&t=…) aufgerufen wurde: Gate ueberspringen,
+    // damit der Abmelde-Dialog direkt erscheint (Nutzer kommt aus der Mail).
+    const params = new URLSearchParams(window.location.search);
+    const isUnsubscribe = params.has('abmelden') && params.has('t');
+
+    if (localStorage.getItem(GATE_STORAGE_KEY) === '1' || isUnsubscribe) {
         entriegeleUI();
         startApp();
         return;
