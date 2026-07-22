@@ -154,7 +154,8 @@ async function ladeTexte() {
 }
 
 // Text mit deutschen Handynummern (Format "+49 XXX YYYYYYYY") in
-// XSS-sichere DOM-Struktur wandeln: jede Nummer wird zum wa.me-Link.
+// XSS-sichere DOM-Struktur wandeln: jede Zeile wird ein eigener Block,
+// jede Nummer zum wa.me-Link mit Chip-Optik.
 function rendereKontaktMitWhatsapp(text) {
     const el = document.querySelector('[data-content="contact_alt"]');
     if (!el) return;
@@ -163,11 +164,14 @@ function rendereKontaktMitWhatsapp(text) {
     const phoneRe = /(\+49[\s\-]?\d{2,4}[\s\-]?\d[\d\s\-]{4,})/g;
     const zeilen = text.split('\n');
 
-    zeilen.forEach((zeile, idx) => {
+    for (const zeile of zeilen) {
+        const div = document.createElement('div');
+        div.className = 'contact-line';
         let last = 0;
         let m;
+        phoneRe.lastIndex = 0;
         while ((m = phoneRe.exec(zeile)) !== null) {
-            if (m.index > last) el.appendChild(document.createTextNode(zeile.slice(last, m.index)));
+            if (m.index > last) div.appendChild(document.createTextNode(zeile.slice(last, m.index)));
             const phoneText = m[1].trim();
             const digits = phoneText.replace(/\D/g, ''); // wa.me will nur Ziffern
             const a = document.createElement('a');
@@ -177,12 +181,12 @@ function rendereKontaktMitWhatsapp(text) {
             a.rel = 'noopener noreferrer';
             a.setAttribute('aria-label', `WhatsApp-Chat mit ${phoneText}`);
             a.textContent = phoneText;
-            el.appendChild(a);
+            div.appendChild(a);
             last = m.index + m[1].length;
         }
-        if (last < zeile.length) el.appendChild(document.createTextNode(zeile.slice(last)));
-        if (idx < zeilen.length - 1) el.appendChild(document.createTextNode('\n'));
-    });
+        if (last < zeile.length) div.appendChild(document.createTextNode(zeile.slice(last)));
+        el.appendChild(div);
+    }
 }
 
 async function ladeSchichten() {

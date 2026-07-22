@@ -659,10 +659,23 @@ button { cursor: pointer; }
 
 .contact-alt__body {
     color: var(--color-text);
-    white-space: pre-line;
     font-size: var(--fs-md);
-    line-height: 1.7;
+    line-height: 1.5;
     margin: 0;
+    white-space: normal;
+}
+
+.contact-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    padding: 0.35rem 0;
+    min-height: 1.6rem;
+}
+.contact-line:empty {
+    padding: 0.1rem 0;
+    min-height: 0.5rem;
 }
 
 .contact-alt__body .wa-link {
