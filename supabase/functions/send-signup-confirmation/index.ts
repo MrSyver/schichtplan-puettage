@@ -29,6 +29,74 @@ function esc(s: string): string {
     return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 }
 
+function icsDates(shift_date: string, start_time: string, end_time: string, endsNextDay: boolean) {
+    const [y, m, d] = shift_date.split('-');
+    const h1 = start_time.slice(0, 2), min1 = start_time.slice(3, 5);
+    const h2 = end_time.slice(0, 2),   min2 = end_time.slice(3, 5);
+    let endY = y, endM = m, endD = d;
+    if (endsNextDay) {
+        const dt = new Date(Number(y), Number(m) - 1, Number(d));
+        dt.setDate(dt.getDate() + 1);
+        endY = String(dt.getFullYear());
+        endM = String(dt.getMonth() + 1).padStart(2, '0');
+        endD = String(dt.getDate()).padStart(2, '0');
+    }
+    return {
+        start: `${y}${m}${d}T${h1}${min1}00`,
+        end:   `${endY}${endM}${endD}T${h2}${min2}00`,
+    };
+}
+
+function buildIcs(uid: string, shift_date: string, start_time: string, end_time: string, endsNextDay: boolean): string {
+    const { start, end } = icsDates(shift_date, start_time, end_time, endsNextDay);
+    const now = new Date();
+    const dtstamp =
+        now.getUTCFullYear().toString() +
+        String(now.getUTCMonth() + 1).padStart(2, '0') +
+        String(now.getUTCDate()).padStart(2, '0') + 'T' +
+        String(now.getUTCHours()).padStart(2, '0') +
+        String(now.getUTCMinutes()).padStart(2, '0') +
+        String(now.getUTCSeconds()).padStart(2, '0') + 'Z';
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Puettage-Helferplan//DE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART;TZID=Europe/Berlin:${start}`,
+        `DTEND;TZID=Europe/Berlin:${end}`,
+        'SUMMARY:Bierwagen-Schicht Püttage 2026',
+        'DESCRIPTION:Deine Schicht am Bierwagen bei den Beckumer Püttagen 2026.',
+        'LOCATION:Beckum',
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ].join('\r\n');
+}
+
+function googleUrl(shift_date: string, start_time: string, end_time: string, endsNextDay: boolean): string {
+    const { start, end } = icsDates(shift_date, start_time, end_time, endsNextDay);
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: 'Bierwagen-Schicht Püttage 2026',
+        dates: `${start}/${end}`,
+        details: 'Deine Schicht am Bierwagen bei den Beckumer Püttagen 2026.',
+        location: 'Beckum',
+        ctz: 'Europe/Berlin',
+    });
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function toBase64(str: string): string {
+    // btoa mit UTF-8-Safe
+    const bytes = new TextEncoder().encode(str);
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin);
+}
+
 Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     if (req.method !== 'POST')    return new Response('method not allowed', { status: 405, headers: CORS });
@@ -86,7 +154,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: shift, error: shErr } = await admin
         .from('shifts')
-        .select('shift_date, start_time, end_time')
+        .select('shift_date, start_time, end_time, ends_next_day')
         .eq('id', signup.shift_id)
         .maybeSingle();
 
@@ -104,6 +172,20 @@ Deno.serve(async (req: Request) => {
         ? `${urlBase}?abmelden=${encodeURIComponent(signup.id as string)}&t=${encodeURIComponent(signup.delete_token as string)}`
         : '';
 
+    const gcalUrl = googleUrl(
+        shift.shift_date as string,
+        shift.start_time as string,
+        shift.end_time   as string,
+        !!shift.ends_next_day,
+    );
+    const icsBody = buildIcs(
+        `signup-${signup.id}@st-sebastian-schichtplan.de`,
+        shift.shift_date as string,
+        shift.start_time as string,
+        shift.end_time   as string,
+        !!shift.ends_next_day,
+    );
+
     const text =
 `Horrido ${signup.name},
 
@@ -111,6 +193,10 @@ vielen Dank fürs Eintragen! Deine Helfer-Schicht am Bierwagen bei den Beckumer 
 
     ${dateStr}
     ${zeitStr}
+
+In den Kalender:
+- Datei "schicht.ics" hängt an dieser Mail (Apple/Outlook: direkt öffnen).
+- Google Calendar: ${gcalUrl}
 
 Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:
 ${unsubUrl || '[Abmelden per Antwort auf diese Mail]'}
@@ -129,6 +215,11 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         <div style="font-weight:600; font-size:1.05rem;">${esc(dateStr)}</div>
         <div style="font-variant-numeric:tabular-nums;">${esc(zeitStr)}</div>
     </div>
+    <p style="margin:16px 0 6px;">In den Kalender:</p>
+    <p style="margin:0 0 16px; color:#64748B; font-size:0.85rem;">📅 Die Datei <em>schicht.ics</em> hängt an dieser Mail – öffne sie in Apple Mail oder Outlook, um den Termin direkt zu übernehmen.</p>
+    <p style="margin:0 0 20px;">
+        <a href="${esc(gcalUrl)}" style="display:inline-block; padding:10px 18px; background:#C8102E; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">🗓 In Google Calendar öffnen</a>
+    </p>
     <p>Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:</p>
     ${unsubUrl
         ? `<p style="margin:16px 0;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 16px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #E2E8F0;">Von dieser Schicht abmelden</a></p>`
@@ -142,6 +233,11 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         from: MAIL_FROM,
         to: [signup.email],
         subject, text, html,
+        attachments: [{
+            filename: 'schicht.ics',
+            content: toBase64(icsBody),
+            content_type: 'text/calendar; charset=utf-8; method=PUBLISH',
+        }],
     };
     if (MAIL_REPLY_TO) payload.reply_to = MAIL_REPLY_TO;
 

@@ -397,7 +397,7 @@ async function bestaetigeUndLoesche(eintrag) {
 }
 
 function schliesseModal() {
-    for (const id of ['signup-modal', 'unsubscribe-modal']) {
+    for (const id of ['signup-modal', 'unsubscribe-modal', 'success-modal']) {
         const m = document.getElementById(id);
         if (m && !m.hidden) m.hidden = true;
     }
@@ -518,10 +518,9 @@ async function handleSubmit(fd) {
     await ladePublicSignups();
     rendereSchichten();
     setzeSubmitLoading(false);
-    schliesseModal();
-    zeigeToast(email
-        ? 'Danke! Dein Eintrag ist gespeichert. Eine Bestätigungsmail ist unterwegs.'
-        : 'Danke! Dein Eintrag ist gespeichert.');
+    // Signup-Modal ausblenden, dann Erfolgs-Dialog mit Kalender-Buttons zeigen
+    document.getElementById('signup-modal').hidden = true;
+    zeigeErfolgModal(schicht, !!email);
 }
 
 async function sendeMailBestaetigung(signupId) {
@@ -592,6 +591,104 @@ function initAbmeldeButton() {
     });
 }
 
+// ---------- Kalender (ICS + Google) ----------
+
+function icsDatumFuer(schicht) {
+    const [y, m, d] = schicht.shift_date.split('-');
+    const [h1, min1] = trimmeUhrzeit(schicht.start_time).split(':');
+    const [h2, min2] = trimmeUhrzeit(schicht.end_time).split(':');
+    let endY = y, endM = m, endD = d;
+    if (schicht.ends_next_day) {
+        const dt = new Date(Number(y), Number(m) - 1, Number(d));
+        dt.setDate(dt.getDate() + 1);
+        endY = String(dt.getFullYear());
+        endM = String(dt.getMonth() + 1).padStart(2, '0');
+        endD = String(dt.getDate()).padStart(2, '0');
+    }
+    return {
+        start: `${y}${m}${d}T${h1}${min1}00`,
+        end:   `${endY}${endM}${endD}T${h2}${min2}00`,
+    };
+}
+
+function baueIcs(schicht) {
+    const { start, end } = icsDatumFuer(schicht);
+    const now = new Date();
+    const dtstamp =
+        now.getUTCFullYear().toString() +
+        String(now.getUTCMonth() + 1).padStart(2, '0') +
+        String(now.getUTCDate()).padStart(2, '0') + 'T' +
+        String(now.getUTCHours()).padStart(2, '0') +
+        String(now.getUTCMinutes()).padStart(2, '0') +
+        String(now.getUTCSeconds()).padStart(2, '0') + 'Z';
+    const uid = `signup-${crypto.randomUUID()}@st-sebastian-schichtplan.de`;
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Puettage-Helferplan//DE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART;TZID=Europe/Berlin:${start}`,
+        `DTEND;TZID=Europe/Berlin:${end}`,
+        'SUMMARY:Bierwagen-Schicht Püttage 2026',
+        'DESCRIPTION:Deine Schicht am Bierwagen bei den Beckumer Püttagen 2026.',
+        'LOCATION:Beckum',
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ].join('\r\n');
+}
+
+function baueGoogleUrl(schicht) {
+    const { start, end } = icsDatumFuer(schicht);
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: 'Bierwagen-Schicht Püttage 2026',
+        dates: `${start}/${end}`,
+        details: 'Deine Schicht am Bierwagen bei den Beckumer Püttagen 2026.',
+        location: 'Beckum',
+        ctz: 'Europe/Berlin',
+    });
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function ladeICSDownload(schicht) {
+    const ics = baueIcs(schicht);
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bierwagen-${schicht.shift_date}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+// ---------- Erfolgs-Dialog ----------
+
+function zeigeErfolgModal(schicht, mitMail) {
+    document.getElementById('success-shift').textContent =
+        `${formatiereTagKopf(schicht.shift_date)}, ${schichtLabel(schicht)}`;
+    document.getElementById('success-mailhint').hidden = !mitMail;
+    document.getElementById('cal-google').href = baueGoogleUrl(schicht);
+
+    document.getElementById('cal-download').onclick = () => ladeICSDownload(schicht);
+    document.getElementById('success-close').onclick = () => schliesseModal();
+
+    const modal = document.getElementById('success-modal');
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+}
+
+function initErfolgModal() {
+    const modal = document.getElementById('success-modal');
+    modal.querySelector('.modal__close').addEventListener('click', schliesseModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) schliesseModal(); });
+}
+
 // ---------- Toast ----------
 
 let toastTimer = null;
@@ -613,6 +710,7 @@ async function startApp() {
     initModalSteuerung();
     initFormular();
     initAbmeldeButton();
+    initErfolgModal();
     ladeTexte();
 
     try {

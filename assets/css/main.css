@@ -772,6 +772,64 @@ button { cursor: pointer; }
     .modal__actions .btn { flex: 0 1 auto; }
 }
 
+/* Success-Dialog */
+.success { text-align: center; margin-bottom: 1.25rem; }
+
+.success__check {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--color-success-soft);
+    color: var(--color-success);
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+}
+
+.success h2 { margin: 0 0 0.4rem; font-size: var(--fs-xl); }
+
+.success__shift {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    padding: 0.55rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    display: inline-block;
+    margin: 0.5rem 0 0.4rem;
+}
+
+.success__hint { color: var(--color-text-muted); font-size: var(--fs-sm); margin: 0.35rem 0 0; }
+.success__hint[hidden] { display: none !important; }
+
+.success__lead {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    margin: 0.5rem 0 0.9rem;
+}
+
+.success__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+}
+.success__actions .btn {
+    justify-content: flex-start;
+    text-decoration: none;
+}
+
+@media (min-width: 480px) {
+    .success__actions { flex-direction: row; }
+    .success__actions .btn { flex: 1; justify-content: center; }
+}
+
+.success__close-row { display: flex; justify-content: flex-end; }
+
 /* Bereits-eingetragen-Liste im Anmelde-Modal */
 .modal__existing {
     margin: 0 0 1rem;
