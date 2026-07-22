@@ -364,10 +364,33 @@ button { cursor: pointer; }
 }
 
 @media (max-width: 520px) {
+    /* Mobile: Admin-Button oben rechts in eigener Zeile,
+       damit Titel darunter die volle Breite bekommt. */
+    .site-header .container {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 0.9rem;
+        row-gap: 0.4rem;
+    }
+    .site-header__logo {
+        grid-row: 2;
+        grid-column: 1;
+    }
+    .site-header__text {
+        grid-row: 2;
+        grid-column: 2;
+        min-width: 0;
+    }
     .site-header__admin {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
-        letter-spacing: 0.1em;
+        grid-row: 1;
+        grid-column: 1 / -1;
+        justify-self: end;
+        align-self: flex-start;
+        margin: 0;
+        font-size: 0.65rem;
+        padding: 0.2rem 0.55rem;
+        letter-spacing: 0.08em;
     }
 }
 
