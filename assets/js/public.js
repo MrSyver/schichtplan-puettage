@@ -21,8 +21,8 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../config.js';
 const WOCHENTAG = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const MIN_FILL_TIME_MS = 1000;
 const GATE_STORAGE_KEY  = 'puettage_unlocked_v1';
-// SHA-256 von "Püttage" (UTF-8). Client-seitig = nur "Insider-Schwelle", keine echte Sicherheit.
-const GATE_PASSWORD_HASH = 'f542126decccbb9ed9a2e06adb0e09309e109aaf7f425704a1c45361fa310215';
+// SHA-256 von "Beckum". Client-seitig = nur "Insider-Schwelle", keine echte Sicherheit.
+const GATE_PASSWORD_HASH = '3cea008d0226246d57690424108f5d3290abf9127e49eb133f3ae853ab94a6de';
 
 // ---------- Zustand ----------
 
