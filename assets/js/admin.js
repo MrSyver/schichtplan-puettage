@@ -226,15 +226,14 @@ async function handleDeleteAll() {
         toast('Nicht bestätigt – nichts gelöscht.', 'error');
         return;
     }
-    // Alle löschen: bulk delete
-    const ids = signupsCache.map(s => s.id);
-    const { error } = await supabase.from('signups').delete().in('id', ids);
+    // Alle löschen: TRUNCATE via RPC (loest keine notify-Mail-Flut aus).
+    const { data, error } = await supabase.rpc('admin_delete_all_signups');
     if (error) {
         console.error('delete-all failed', error);
         toast('Massenlöschung fehlgeschlagen.', 'error');
         return;
     }
-    toast(`${ids.length} Anmeldungen gelöscht.`);
+    toast(`${data ?? 0} Anmeldungen gelöscht.`);
     await ladeDaten();
 }
 
