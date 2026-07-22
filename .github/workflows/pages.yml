@@ -1,0 +1,50 @@
+name: Deploy zu GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # config.js wird zur Build-Zeit aus Secrets erzeugt.
+      # Lege im Repo unter Settings → Secrets → Actions folgende Secrets an:
+      #   SUPABASE_URL       – z. B. https://xxxx.supabase.co
+      #   SUPABASE_ANON_KEY  – der public anon Key
+      #   ADMIN_EMAIL        – mormartin@icloud.com
+      - name: Erzeuge config.js aus Secrets
+        run: |
+          cat > config.js <<EOF
+          export const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';
+          export const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';
+          export const ADMIN_EMAIL = '${{ secrets.ADMIN_EMAIL }}';
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artefakt
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" role="img" aria-label="Puettage Helferplan Logo (Platzhalter)">
+  <!-- Platzhalter-Logo bis das Vereinslogo geliefert wird.
+       Weisser Kreis mit rotem Ring und Buchstaben "P" (Puettage). -->
+  <circle cx="22" cy="22" r="20" fill="#FFFFFF" stroke="#C8102E" stroke-width="3"/>
+  <text x="22" y="30" text-anchor="middle"
+        font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+        font-weight="700" font-size="22" fill="#C8102E">P</text>
+</svg>

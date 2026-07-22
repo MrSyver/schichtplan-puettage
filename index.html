@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Helferplan St. Sebastian Bierwagen · Püttage 2026</title>
+    <meta name="description" content="Trag dich in eine Schicht am Bierwagen bei den Beckumer Püttagen 2026 ein.">
+    <meta name="theme-color" content="#C8102E">
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+
+    <meta property="og:title" content="Püttage 2026 – Helferplan Bierwagen">
+    <meta property="og:description" content="Trag dich in eine Schicht ein. Drei Tage, elf Schichten – jede Stunde zählt.">
+    <meta property="og:type" content="website">
+</head>
+<body>
+
+    <!-- Passwort-Gate mit „Zugriff anfragen" -->
+    <div id="password-gate" class="gate" role="dialog" aria-labelledby="gate-title">
+        <div class="gate__panel">
+            <img src="assets/img/logo.png" alt="" width="112" height="112" class="gate__logo">
+            <h1 id="gate-title" class="gate__title">Schön, dass du helfen möchtest</h1>
+            <p class="gate__lead">Gib bitte das Passwort ein, um den Schichtplan zu sehen. Du hast es vom Verein bekommen.</p>
+            <form id="gate-form" class="gate__form" autocomplete="off">
+                <label class="sr-only" for="gate-password">Passwort</label>
+                <input type="password" id="gate-password" name="password" placeholder="Passwort" autofocus required>
+                <button type="submit" class="btn btn--primary">Weiter</button>
+                <div id="gate-error" class="gate__error" role="alert" hidden></div>
+            </form>
+
+            <!-- Zugriff anfragen: schickt Mail an Betreiber -->
+            <details class="gate__request" id="request-details">
+                <summary>Kein Passwort? Zugriff anfragen</summary>
+                <form id="request-form" class="gate__form gate__form--request" autocomplete="off">
+                    <p class="gate__request-lead">Trag deine E-Mail ein – wir schicken dir das Passwort kurzfristig zu.</p>
+                    <label class="sr-only" for="request-email">Deine E-Mail-Adresse</label>
+                    <input type="email" id="request-email" name="email" placeholder="deine@mail.de" required>
+                    <label class="sr-only" for="request-name">Dein Name (optional)</label>
+                    <input type="text" id="request-name" name="name" placeholder="Dein Name (optional)" maxlength="80">
+                    <button type="submit" class="btn btn--primary">Anfrage senden</button>
+                    <p class="gate__hint">Deine E-Mail wird ausschließlich verwendet, um dir das Passwort zuzusenden. <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a></p>
+                    <div id="request-feedback" class="gate__error" role="status" hidden></div>
+                </form>
+            </details>
+
+            <nav class="gate__legal" aria-label="Rechtliches">
+                <a href="impressum.html">Impressum</a>
+                <a href="datenschutz.html">Datenschutz</a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="app" class="app" hidden>
+        <header class="site-header">
+            <div class="container">
+                <img class="site-header__logo" src="assets/img/logo.png" alt="" width="72" height="72">
+                <div>
+                    <div class="site-header__title">Helferplan St. Sebastian Bierwagen</div>
+                    <div class="site-header__subtitle">Püttage 2026 · 04. – 06. September · Beckum</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container">
+
+            <section class="hero" aria-labelledby="hero-title">
+                <h1 id="hero-title" data-content="hero_title">Püttage 2026 – Bierwagen-Helfer gesucht 🍺</h1>
+                <p class="hero__body" data-content="hero_body">Horrido! Es ist wieder soweit – die Püttage stehen an und unser Bierwagen ist wie jedes Jahr am Start. Da wir den Wagen selbst betreiben, brauchen wir noch die eine oder andere Frau bzw. den einen oder anderen Mann am Zapfhahn. Gute Werbung für den Verein – und der eigene Biergenuss kommt auch nicht zu kurz. 😉</p>
+            </section>
+
+            <section class="plan-intro" aria-labelledby="plan-title">
+                <h2 id="plan-title" class="sr-only">So funktioniert die Anmeldung</h2>
+                <p data-content="plan_intro">Wähl eine Schicht und trag dich mit Namen ein. Kontaktdaten sind freiwillig und werden nur von den Verantwortlichen gesehen. Ob dein Name für andere sichtbar ist, entscheidest du selbst.</p>
+            </section>
+
+            <section class="plan" aria-label="Schichtplan">
+                <div id="plan-grid" class="plan__grid">
+                    <p class="plan__loading">Lade Schichten …</p>
+                </div>
+            </section>
+
+            <section class="contact-alt" aria-labelledby="contact-alt-title">
+                <h2 id="contact-alt-title" class="contact-alt__title">Lieber persönlich?</h2>
+                <p class="contact-alt__body" data-content="contact_alt">Ihr könnt euch auch direkt bei uns melden:
+Moritz Martin · +49 176 82241879
+Tjorven Martin · +49 151 58730650</p>
+            </section>
+
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                <nav class="site-footer__links" aria-label="Rechtliches">
+                    <a href="impressum.html">Impressum</a>
+                    <a href="datenschutz.html">Datenschutzerklärung</a>
+                </nav>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Anmelde-Formular -->
+    <div id="signup-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+        <div class="modal__panel">
+            <button type="button" class="modal__close" aria-label="Fenster schließen">&times;</button>
+            <h2 id="modal-title">Schicht übernehmen</h2>
+            <div id="modal-shift-info" class="modal__shift-info"></div>
+
+            <!-- Bereits eingetragene Personen – mit Loesch-Button (fuer alle) -->
+            <div id="modal-existing" class="modal__existing" hidden>
+                <div class="modal__existing-title">Bereits eingetragen</div>
+                <ul id="modal-existing-list" class="modal__existing-list"></ul>
+            </div>
+
+            <form id="signup-form" class="form" novalidate>
+                <div class="form__honeypot" aria-hidden="true">
+                    <label>Website (bitte freilassen)
+                        <input type="text" name="website" tabindex="-1" autocomplete="off">
+                    </label>
+                </div>
+
+                <label class="form__field">
+                    <span class="form__label">Name <span class="form__req" aria-hidden="true">*</span></span>
+                    <input type="text" name="name" required minlength="2" maxlength="80" autocomplete="name">
+                </label>
+
+                <p class="form__hint">Kontaktdaten sind freiwillig und werden ausschließlich von den Verantwortlichen gesehen – nicht öffentlich auf der Seite.</p>
+
+                <label class="form__field">
+                    <span class="form__label">E-Mail</span>
+                    <input type="email" name="email" id="signup-email" maxlength="120" autocomplete="email" inputmode="email" placeholder="name@beispiel.de">
+                </label>
+
+                <label class="form__check form__check--reminder" id="reminder-wrap" hidden>
+                    <input type="checkbox" name="remind_via_email">
+                    <span>Ich möchte eine Erinnerungsmail vor meiner Schicht bekommen.</span>
+                </label>
+
+                <label class="form__field">
+                    <span class="form__label">Telefon</span>
+                    <input type="tel" name="phone" maxlength="30" autocomplete="tel" inputmode="tel" placeholder="0170 …">
+                </label>
+
+                <label class="form__check">
+                    <input type="checkbox" name="show_name_publicly">
+                    <span>Meinen Namen für andere Helfer auf der Seite sichtbar machen</span>
+                </label>
+
+                <label class="form__check">
+                    <input type="checkbox" name="consent" required>
+                    <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen und willige in die Verarbeitung meiner Daten zur Koordination der Helferschichten ein. Alle Anmeldedaten werden nach den Püttagen (spätestens 04.10.2026) gelöscht.</span>
+                </label>
+
+                <div id="form-error" class="form__error" role="alert" hidden></div>
+
+                <button type="submit" class="btn btn--primary" id="form-submit">
+                    <span class="btn__label">Verbindlich eintragen</span>
+                    <span class="btn__spinner" aria-hidden="true" hidden></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Abmelde-Bestätigungsdialog (per Link aus Bestätigungsmail) -->
+    <div id="unsubscribe-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="unsub-title" hidden>
+        <div class="modal__panel">
+            <button type="button" class="modal__close" aria-label="Fenster schließen">&times;</button>
+            <h2 id="unsub-title">Von der Schicht abmelden?</h2>
+            <p id="unsub-body">Möchtest du deinen Eintrag wirklich löschen? Diese Aktion lässt sich nicht rückgängig machen.</p>
+            <div id="unsub-error" class="form__error" role="alert" hidden></div>
+            <div class="modal__actions">
+                <button type="button" id="unsub-cancel" class="btn">Behalten</button>
+                <button type="button" id="unsub-confirm" class="btn btn--primary">Ja, austragen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="assets/js/public.js?v=6"></script>
+</body>
+</html>

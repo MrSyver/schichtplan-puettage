@@ -1,0 +1,23 @@
+# Lokale Konfiguration mit Supabase-Credentials – NIEMALS committen
+config.js
+
+# macOS
+.DS_Store
+._*
+
+# Editoren
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (falls je gebraucht – aktuell nicht)
+node_modules/
+
+# Screenshots / lokale Notizen
+/scratch/
+/tmp/
