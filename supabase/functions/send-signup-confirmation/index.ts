@@ -197,7 +197,8 @@ In den Kalender:
 Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:
 ${unsubUrl || '[Abmelden per Antwort auf diese Mail]'}
 
-Bis zum Fest,
+Danke für deine Unterstützung!
+Horrido und bis zum Fest,
 Familie Martin
 
 --
@@ -232,7 +233,7 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         ? `<p style="margin:0 0 24px;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 18px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #CBD5E1; font-weight:600;">Aus dieser Schicht austragen</a></p>`
         : `<p style="margin:0 0 24px; color:#64748B;">Zum Abmelden einfach kurz auf diese E-Mail antworten.</p>`}
 
-    <p style="margin-top:24px;">Bis zum Fest,<br><strong>Familie Martin</strong></p>
+    <p style="margin-top:24px;">Danke für deine Unterstützung!<br>Horrido und bis zum Fest,<br><strong>Familie Martin</strong></p>
     <hr style="border:none; border-top:1px solid #E2E8F0; margin:32px 0 12px;">
     <p style="color:#64748B; font-size:0.8125rem;">Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen angegeben wurde.</p>
 </body></html>`;

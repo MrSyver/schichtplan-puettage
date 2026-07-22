@@ -119,7 +119,8 @@ Wir freuen uns auf dich.
 Falls du kurzfristig doch nicht kannst:
 ${unsubUrl}
 
-Bis morgen,
+Danke für deine Unterstützung!
+Horrido und bis morgen,
 Familie Martin`;
 
         const html = `<!doctype html>
@@ -132,7 +133,7 @@ Familie Martin`;
     </div>
     <p>Wir freuen uns auf dich!</p>
     <p style="margin:20px 0;"><a href="${esc(unsubUrl)}" style="color:#64748B; font-size:0.85rem; text-decoration:underline;">Doch nicht können? Hier austragen.</a></p>
-    <p style="margin-top:24px;">Bis morgen,<br><strong>Familie Martin</strong></p>
+    <p style="margin-top:24px;">Danke für deine Unterstützung!<br>Horrido und bis morgen,<br><strong>Familie Martin</strong></p>
 </body></html>`;
 
         const payload: Record<string, unknown> = { from: MAIL_FROM, to: [s.email], subject, text, html };
