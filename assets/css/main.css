@@ -904,6 +904,191 @@ button { cursor: pointer; }
 .toast--error { background: var(--color-danger); }
 
 /* --------------------------------------------------------
+   Admin-Bereich (admin.html)
+   -------------------------------------------------------- */
+
+.admin-header .container {
+    position: relative;
+    padding-right: 5rem;
+}
+
+.admin-header__logout {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+}
+.admin-header__logout:hover { background: rgba(255,255,255,0.25); }
+
+.admin-main {
+    padding: 2rem 1rem 4rem;
+    display: grid;
+    gap: 2.5rem;
+}
+
+.admin-section {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-section__head h2 {
+    margin: 0;
+    font-size: var(--fs-xl);
+}
+
+.admin-section__meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+}
+
+.admin-hint {
+    background: var(--color-surface-alt);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    margin: 0 0 1.25rem;
+}
+
+.admin-danger {
+    background: var(--color-danger-soft) !important;
+    color: var(--color-danger) !important;
+    border-color: rgba(220, 38, 38, 0.4) !important;
+    box-shadow: none !important;
+}
+.admin-danger:hover:not([disabled]) {
+    background: var(--color-danger) !important;
+    color: #fff !important;
+}
+
+.admin-signups { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.admin-shift {
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+}
+
+.admin-shift__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.admin-shift__title { font-weight: 700; color: var(--color-text-strong); }
+.admin-shift__meta  { font-size: var(--fs-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+.admin-row {
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    margin-top: 0.5rem;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--color-border);
+}
+
+.admin-row summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+    flex-wrap: wrap;
+}
+.admin-row summary::-webkit-details-marker { display: none; }
+.admin-row summary::before {
+    content: '›';
+    display: inline-block;
+    margin-right: 0.35rem;
+    transition: transform 0.15s;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+.admin-row[open] summary::before { transform: rotate(90deg); }
+
+.admin-row__name { font-weight: 600; color: var(--color-text-strong); }
+
+.admin-row__tags {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.tag {
+    font-size: var(--fs-xs);
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-alt);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+.tag--ok   { background: var(--color-success-soft); color: var(--color-success); }
+.tag--info { background: var(--color-primary-soft); color: var(--color-primary-dark); }
+
+.admin-row__body {
+    padding: 0.75rem 0.25rem 0.25rem;
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    display: grid;
+    gap: 0.35rem;
+}
+
+.admin-row__actions {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-texts textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--fs-md);
+    padding: 0.7rem 0.9rem;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+}
+.admin-texts textarea:focus,
+.admin-texts input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+/* --------------------------------------------------------
    Footer
    -------------------------------------------------------- */
 

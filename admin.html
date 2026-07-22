@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin – Helferplan Bierwagen</title>
+    <meta name="theme-color" content="#C8102E">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+    <!-- Login-Panel (nur Passwort sichtbar, E-Mail wird programmatisch mitgesendet) -->
+    <div id="login-panel" class="gate" role="dialog" aria-labelledby="login-title">
+        <div class="gate__panel">
+            <img src="assets/img/logo.png" alt="" width="112" height="112" class="gate__logo">
+            <h1 id="login-title" class="gate__title">Admin-Bereich</h1>
+            <p class="gate__lead">Passwort eingeben, um zu Anmeldungen und Texten zu gelangen.</p>
+            <form id="login-form" class="gate__form" autocomplete="off">
+                <label class="sr-only" for="login-password">Passwort</label>
+                <input type="password" id="login-password" name="password" placeholder="Passwort" autofocus required>
+                <button type="submit" class="btn btn--primary">Einloggen</button>
+                <div id="login-error" class="gate__error" role="alert" hidden></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-app" hidden>
+        <header class="site-header admin-header">
+            <div class="container">
+                <img class="site-header__logo" src="assets/img/logo.png" alt="" width="72" height="72">
+                <div>
+                    <div class="site-header__title">Admin · Helferplan Bierwagen</div>
+                    <div class="site-header__subtitle">Interne Ansicht · Bitte nicht öffentlich verlinken</div>
+                </div>
+                <button type="button" id="logout-btn" class="btn admin-header__logout">Logout</button>
+            </div>
+        </header>
+
+        <main class="container admin-main">
+
+            <!-- Abschnitt 1: Anmeldungen -->
+            <section class="admin-section" aria-labelledby="signups-title">
+                <div class="admin-section__head">
+                    <h2 id="signups-title">Anmeldungen verwalten</h2>
+                    <div class="admin-section__meta">
+                        <span id="signups-count">–</span>
+                        <button type="button" id="delete-all-btn" class="btn admin-danger" hidden>Alle Anmeldungen löschen …</button>
+                    </div>
+                </div>
+                <div id="signups-list" class="admin-signups">
+                    <p class="plan__loading">Lade Anmeldungen …</p>
+                </div>
+            </section>
+
+            <!-- Abschnitt 2: Redaktionelle Texte -->
+            <section class="admin-section" aria-labelledby="texts-title">
+                <div class="admin-section__head">
+                    <h2 id="texts-title">Redaktionelle Texte</h2>
+                </div>
+                <p class="admin-hint">Änderungen sind nach dem Speichern sofort auf der Startseite sichtbar. Impressum und Datenschutz sind bewusst hier <strong>nicht</strong> editierbar – rechtlich sensibel und werden direkt im HTML gepflegt.</p>
+
+                <form id="texts-form" class="admin-texts">
+                    <label class="form__field">
+                        <span class="form__label">Teaser-Überschrift (hero_title)</span>
+                        <input type="text" name="hero_title" maxlength="200">
+                    </label>
+                    <label class="form__field">
+                        <span class="form__label">Teaser-Text (hero_body)</span>
+                        <textarea name="hero_body" rows="6" maxlength="1000"></textarea>
+                    </label>
+                    <label class="form__field">
+                        <span class="form__label">Erklärung über dem Plan (plan_intro)</span>
+                        <textarea name="plan_intro" rows="4" maxlength="600"></textarea>
+                    </label>
+                    <label class="form__field">
+                        <span class="form__label">Kontakt-Alternative (contact_alt)</span>
+                        <textarea name="contact_alt" rows="4" maxlength="600"></textarea>
+                    </label>
+                    <button type="submit" class="btn btn--primary" id="texts-save">Speichern</button>
+                </form>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="assets/js/admin.js?v=1"></script>
+</body>
+</html>
