@@ -333,6 +333,44 @@ button { cursor: pointer; }
     gap: 1.25rem;
 }
 
+.site-header__text {
+    flex: 1;
+    min-width: 0;
+}
+
+.site-header__admin {
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    opacity: 0.55;
+    text-decoration: none;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid rgba(201, 162, 75, 0.35);
+    border-radius: var(--radius-pill);
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.site-header__admin:hover,
+.site-header__admin:focus-visible {
+    opacity: 1;
+    color: var(--color-gold);
+    background: rgba(201, 162, 75, 0.12);
+    border-color: rgba(201, 162, 75, 0.7);
+}
+
+@media (max-width: 520px) {
+    .site-header__admin {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        letter-spacing: 0.1em;
+    }
+}
+
 .site-header__logo {
     width: 96px;
     height: 96px;

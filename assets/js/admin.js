@@ -257,20 +257,25 @@ async function handleTexteSave(e) {
     btn.textContent = 'Speichere …';
 
     const fd = new FormData(e.target);
-    const updates = [];
+    const now = new Date().toISOString();
+    const errors = [];
+
+    // Reines UPDATE pro Key (Keys existieren per Seed) – umgeht fehlende INSERT-Policy
     for (const key of ['hero_title', 'hero_body', 'plan_intro', 'contact_alt']) {
         const value = (fd.get(key) ?? '').toString();
-        updates.push({ key, value, updated_at: new Date().toISOString() });
+        const { error } = await supabase.from('site_content')
+            .update({ value, updated_at: now })
+            .eq('key', key);
+        if (error) {
+            console.error('save failed for', key, error);
+            errors.push(`${key}: ${error.message}`);
+        }
     }
-
-    // Upsert alle vier Texte
-    const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'key' });
     btn.disabled = false;
     btn.textContent = orig;
 
-    if (error) {
-        console.error('texte save failed', error);
-        toast('Speichern fehlgeschlagen.', 'error');
+    if (errors.length > 0) {
+        toast(`Speichern fehlgeschlagen (${errors.length}). Details in der Konsole.`, 'error');
         return;
     }
     toast('Texte gespeichert. Änderungen sind sofort auf der Startseite sichtbar.');
