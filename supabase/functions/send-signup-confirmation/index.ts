@@ -178,13 +178,9 @@ Deno.serve(async (req: Request) => {
         shift.end_time   as string,
         !!shift.ends_next_day,
     );
-    const icsBody = buildIcs(
-        `signup-${signup.id}@st-sebastian-schichtplan.de`,
-        shift.shift_date as string,
-        shift.start_time as string,
-        shift.end_time   as string,
-        !!shift.ends_next_day,
-    );
+    // Kalender-Button-URL: liefert ICS-Datei aus der ics-Function; iPhone/Safari
+    // erkennt text/calendar und oeffnet direkt Apple Kalender.
+    const icsUrl = `${SUPABASE_URL}/functions/v1/ics?signup=${encodeURIComponent(signup.id as string)}&t=${encodeURIComponent(signup.delete_token as string)}`;
 
     const text =
 `Horrido ${signup.name},
@@ -195,8 +191,8 @@ vielen Dank fürs Eintragen! Deine Helfer-Schicht am Bierwagen bei den Beckumer 
     ${zeitStr}
 
 In den Kalender:
-- Datei "schicht.ics" hängt an dieser Mail (Apple/Outlook: direkt öffnen).
-- Google Calendar: ${gcalUrl}
+- Apple/iPhone/Outlook: ${icsUrl}
+- Google Calendar:      ${gcalUrl}
 
 Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:
 ${unsubUrl || '[Abmelden per Antwort auf diese Mail]'}
@@ -215,16 +211,28 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         <div style="font-weight:600; font-size:1.05rem;">${esc(dateStr)}</div>
         <div style="font-variant-numeric:tabular-nums;">${esc(zeitStr)}</div>
     </div>
-    <p style="margin:16px 0 6px;">In den Kalender:</p>
-    <p style="margin:0 0 16px; color:#64748B; font-size:0.85rem;">📅 Die Datei <em>schicht.ics</em> hängt an dieser Mail – öffne sie in Apple Mail oder Outlook, um den Termin direkt zu übernehmen.</p>
-    <p style="margin:0 0 20px;">
-        <a href="${esc(gcalUrl)}" style="display:inline-block; padding:10px 18px; background:#C8102E; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">🗓 In Google Calendar öffnen</a>
-    </p>
-    <p>Du bist auf der Liste. Solltest du nicht können, kein Problem. Melde dich nur bitte rechtzeitig ab:</p>
+    <p style="margin:20px 0 8px; font-weight:600;">In deinen Kalender speichern:</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:0 0 8px;">
+        <tr>
+            <td style="padding:0 8px 8px 0;">
+                <a href="${esc(icsUrl)}" style="display:inline-block; padding:10px 18px; background:#0F172A; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">📅 Apple / iPhone / Outlook</a>
+            </td>
+            <td style="padding:0 0 8px 0;">
+                <a href="${esc(gcalUrl)}" style="display:inline-block; padding:10px 18px; background:#1A73E8; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">🗓 Google Calendar</a>
+            </td>
+        </tr>
+    </table>
+    <p style="color:#64748B; font-size:0.8rem; margin:0 0 24px;">Auf dem iPhone öffnet der erste Button den Kalender direkt.</p>
+
+    <hr style="border:none; border-top:1px solid #E2E8F0; margin:24px 0 20px;">
+
+    <p style="font-weight:600; margin:0 0 8px;">Du kannst nicht?</p>
+    <p style="margin:0 0 12px; color:#475569;">Kein Problem – melde dich nur bitte rechtzeitig ab, damit wir jemand anderes anfragen können.</p>
     ${unsubUrl
-        ? `<p style="margin:16px 0;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 16px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #E2E8F0;">Von dieser Schicht abmelden</a></p>`
-        : `<p style="margin:16px 0; color:#64748B;">Zum Abmelden: einfach kurz auf diese E-Mail antworten.</p>`}
-    <p style="margin-top:32px;">Bis zum Fest,<br><strong>Familie Martin</strong></p>
+        ? `<p style="margin:0 0 24px;"><a href="${esc(unsubUrl)}" style="display:inline-block; padding:10px 18px; background:#F1F2F4; color:#0F172A; border-radius:8px; text-decoration:none; border:1px solid #CBD5E1; font-weight:600;">Aus dieser Schicht austragen</a></p>`
+        : `<p style="margin:0 0 24px; color:#64748B;">Zum Abmelden einfach kurz auf diese E-Mail antworten.</p>`}
+
+    <p style="margin-top:24px;">Bis zum Fest,<br><strong>Familie Martin</strong></p>
     <hr style="border:none; border-top:1px solid #E2E8F0; margin:32px 0 12px;">
     <p style="color:#64748B; font-size:0.8125rem;">Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen angegeben wurde.</p>
 </body></html>`;
@@ -233,11 +241,6 @@ Diese Mail wurde automatisch versendet, weil deine E-Mail-Adresse beim Eintragen
         from: MAIL_FROM,
         to: [signup.email],
         subject, text, html,
-        attachments: [{
-            filename: 'schicht.ics',
-            content: toBase64(icsBody),
-            content_type: 'text/calendar; charset=utf-8; method=PUBLISH',
-        }],
     };
     if (MAIL_REPLY_TO) payload.reply_to = MAIL_REPLY_TO;
 
