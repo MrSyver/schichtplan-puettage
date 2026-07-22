@@ -144,9 +144,45 @@ async function ladeTexte() {
     const { data, error } = await supabase.from('site_content').select('key, value');
     if (error || !data) return;
     for (const row of data) {
+        if (row.key === 'contact_alt') {
+            rendereKontaktMitWhatsapp(row.value ?? '');
+            continue;
+        }
         const ziel = document.querySelector(`[data-content="${row.key}"]`);
         if (ziel && typeof row.value === 'string') ziel.textContent = row.value;
     }
+}
+
+// Text mit deutschen Handynummern (Format "+49 XXX YYYYYYYY") in
+// XSS-sichere DOM-Struktur wandeln: jede Nummer wird zum wa.me-Link.
+function rendereKontaktMitWhatsapp(text) {
+    const el = document.querySelector('[data-content="contact_alt"]');
+    if (!el) return;
+    while (el.firstChild) el.removeChild(el.firstChild);
+
+    const phoneRe = /(\+49[\s\-]?\d{2,4}[\s\-]?\d[\d\s\-]{4,})/g;
+    const zeilen = text.split('\n');
+
+    zeilen.forEach((zeile, idx) => {
+        let last = 0;
+        let m;
+        while ((m = phoneRe.exec(zeile)) !== null) {
+            if (m.index > last) el.appendChild(document.createTextNode(zeile.slice(last, m.index)));
+            const phoneText = m[1].trim();
+            const digits = phoneText.replace(/\D/g, ''); // wa.me will nur Ziffern
+            const a = document.createElement('a');
+            a.href = `https://wa.me/${digits}`;
+            a.className = 'wa-link';
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.setAttribute('aria-label', `WhatsApp-Chat mit ${phoneText}`);
+            a.textContent = phoneText;
+            el.appendChild(a);
+            last = m.index + m[1].length;
+        }
+        if (last < zeile.length) el.appendChild(document.createTextNode(zeile.slice(last)));
+        if (idx < zeilen.length - 1) el.appendChild(document.createTextNode('\n'));
+    });
 }
 
 async function ladeSchichten() {
