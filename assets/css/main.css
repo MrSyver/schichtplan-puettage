@@ -1046,6 +1046,20 @@ button { cursor: pointer; }
 .admin-overview .shift__names { color: var(--color-text); }
 .admin-overview .shift__names .anon { color: var(--color-text-muted); font-style: italic; }
 
+.shift__people {
+    grid-column: 1 / -1;
+    list-style: none;
+    padding: 0;
+    margin: 0.4rem 0 0;
+    font-size: var(--fs-xs);
+    color: var(--color-text);
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+}
+.shift__people li { padding: 0.1rem 0; }
+.shift__people .anon { color: var(--color-text-muted); font-style: italic; }
+.shift__people .shift__contact { color: var(--color-text-muted); }
+
 .admin-main {
     padding: 2rem 1rem 4rem;
     display: grid;

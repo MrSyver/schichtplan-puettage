@@ -225,16 +225,25 @@ function rendereUebersicht() {
             card.appendChild(slots);
 
             if (rows.length > 0) {
-                const namenEl = document.createElement('span');
-                namenEl.className = 'shift__names';
-                rows.forEach((s, i) => {
-                    const span = document.createElement('span');
-                    span.textContent = s.name || 'unbekannt';
-                    if (!s.show_name_publicly) span.className = 'anon';
-                    namenEl.appendChild(span);
-                    if (i < rows.length - 1) namenEl.appendChild(document.createTextNode(', '));
-                });
-                card.appendChild(namenEl);
+                const listEl = document.createElement('ul');
+                listEl.className = 'shift__people';
+                for (const s of rows) {
+                    const li = document.createElement('li');
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = s.name || 'unbekannt';
+                    if (!s.show_name_publicly) nameSpan.className = 'anon';
+                    li.appendChild(nameSpan);
+
+                    const kontakt = [s.phone, s.email].filter(Boolean).join(' · ');
+                    if (kontakt) {
+                        const kSpan = document.createElement('span');
+                        kSpan.className = 'shift__contact';
+                        kSpan.textContent = ' · ' + kontakt;
+                        li.appendChild(kSpan);
+                    }
+                    listEl.appendChild(li);
+                }
+                card.appendChild(listEl);
             }
             spalte.appendChild(card);
         }
